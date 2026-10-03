@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 export default function Home() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [selectedWork, setSelectedWork] = useState<string | null>(null);
+  const [contactStatus, setContactStatus] = useState<"idle" | "sending" | "success" | "error">("idle");
 
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -26,6 +27,33 @@ export default function Home() {
   }, []);
 
   const closeMenu = () => setMenuOpen(false);
+
+  const handleContactSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    setContactStatus("sending");
+
+    const form = event.currentTarget;
+    const formData = new FormData(form);
+
+    try {
+      const response = await fetch("https://formspree.io/f/xaenrqwk", {
+        method: "POST",
+        body: formData,
+        headers: {
+          Accept: "application/json",
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error("Form submission failed");
+      }
+
+      form.reset();
+      setContactStatus("success");
+    } catch {
+      setContactStatus("error");
+    }
+  };
 
   return (
     <main className="site">
@@ -119,6 +147,15 @@ export default function Home() {
 
                 <a href="#expertise" className="secondary-button">
                   Technical Expertise
+                </a>
+
+                <a
+                  href="/Ganesh-Handge-DevOps-Resume.pdf"
+                  download
+                  className="secondary-button resume-button"
+                >
+                  Download Resume
+                  <span>↓</span>
                 </a>
               </div>
 
@@ -590,6 +627,8 @@ export default function Home() {
                 "Helm",
                 "Prometheus",
               ]}
+              projectKey="kubernetes"
+              onOpen={() => setSelectedWork("kubernetes")}
             />
 
             <WorkCard
@@ -603,6 +642,8 @@ export default function Home() {
                 "ARM",
                 "IaC",
               ]}
+              projectKey="terraform"
+              onOpen={() => setSelectedWork("terraform")}
             />
 
             <WorkCard
@@ -617,6 +658,8 @@ export default function Home() {
                 "SonarQube",
                 "Trivy",
               ]}
+              projectKey="devsecops"
+              onOpen={() => setSelectedWork("devsecops")}
             />
           </div>
         </div>
@@ -702,6 +745,75 @@ export default function Home() {
               challenging infrastructure problems.
             </p>
 
+            <form className="contact-form" onSubmit={handleContactSubmit}>
+              <div className="contact-form-row">
+                <label>
+                  <span>YOUR NAME</span>
+                  <input
+                    type="text"
+                    name="name"
+                    placeholder="Your name"
+                    autoComplete="name"
+                    required
+                  />
+                </label>
+
+                <label>
+                  <span>EMAIL ADDRESS</span>
+                  <input
+                    type="email"
+                    name="email"
+                    placeholder="you@example.com"
+                    autoComplete="email"
+                    required
+                  />
+                </label>
+              </div>
+
+              <label>
+                <span>SUBJECT</span>
+                <input
+                  type="text"
+                  name="subject"
+                  placeholder="How can I help?"
+                  required
+                />
+              </label>
+
+              <label>
+                <span>MESSAGE</span>
+                <textarea
+                  name="message"
+                  placeholder="Tell me a little about your requirement..."
+                  rows={6}
+                  required
+                />
+              </label>
+
+              <button
+                type="submit"
+                className="contact-submit"
+                disabled={contactStatus === "sending"}
+              >
+                <span>
+                  {contactStatus === "sending" ? "SENDING..." : "SEND MESSAGE"}
+                </span>
+                <span>↗</span>
+              </button>
+
+              {contactStatus === "success" && (
+                <p className="contact-status success" role="status">
+                  Message sent successfully. I&apos;ll get back to you soon.
+                </p>
+              )}
+
+              {contactStatus === "error" && (
+                <p className="contact-status error" role="alert">
+                  Something went wrong. Please try again or email me directly.
+                </p>
+              )}
+            </form>
+
             <a
               href="mailto:ghandge9@gmail.com"
               className="contact-email"
@@ -730,6 +842,13 @@ export default function Home() {
           </div>
         </div>
       </section>
+
+      {selectedWork && (
+        <ProjectModal
+          projectKey={selectedWork}
+          onClose={() => setSelectedWork(null)}
+        />
+      )}
 
       {/* =====================================================
           FOOTER
@@ -1263,6 +1382,18 @@ export default function Home() {
           border-color: #8dffbf;
 
           color: #ffffff;
+        }
+
+        .resume-button {
+          display: inline-flex;
+          align-items: center;
+          gap: 12px;
+        }
+
+        .resume-button span {
+          color: #8dffbf;
+          font-size: 14px;
+          line-height: 1;
         }
 
         /* =========================
@@ -2565,6 +2696,105 @@ export default function Home() {
           gap: 30px;
         }
 
+        .contact-form {
+          max-width: 780px;
+          margin-top: 48px;
+          display: flex;
+          flex-direction: column;
+          gap: 20px;
+        }
+
+        .contact-form-row {
+          display: grid;
+          grid-template-columns: repeat(2, 1fr);
+          gap: 16px;
+        }
+
+        .contact-form label {
+          display: flex;
+          flex-direction: column;
+          gap: 9px;
+        }
+
+        .contact-form label > span {
+          color: #68737d;
+          font-size: 8px;
+          letter-spacing: 0.15em;
+        }
+
+        .contact-form input,
+        .contact-form textarea {
+          width: 100%;
+          border: 1px solid #252c32;
+          background: rgba(255, 255, 255, 0.025);
+          color: #ffffff;
+          padding: 15px 16px;
+          font: inherit;
+          font-size: 12px;
+          line-height: 1.6;
+          outline: none;
+          resize: vertical;
+          transition: border-color 0.25s ease, background 0.25s ease;
+        }
+
+        .contact-form input::placeholder,
+        .contact-form textarea::placeholder {
+          color: #59636d;
+        }
+
+        .contact-form input:focus,
+        .contact-form textarea:focus {
+          border-color: rgba(141, 255, 191, 0.65);
+          background: rgba(141, 255, 191, 0.035);
+        }
+
+        .contact-submit {
+          align-self: flex-start;
+          display: inline-flex;
+          align-items: center;
+          justify-content: space-between;
+          gap: 30px;
+          min-width: 175px;
+          padding: 14px 17px;
+          border: 1px solid #8dffbf;
+          background: #8dffbf;
+          color: #07100b;
+          font: inherit;
+          font-size: 10px;
+          font-weight: 700;
+          letter-spacing: 0.08em;
+          cursor: pointer;
+          transition: transform 0.25s ease, background 0.25s ease;
+        }
+
+        .contact-submit:hover:not(:disabled) {
+          transform: translateY(-3px);
+          background: #b2ffd0;
+        }
+
+        .contact-submit:disabled {
+          cursor: wait;
+          opacity: 0.65;
+        }
+
+        .contact-submit span:last-child {
+          font-size: 15px;
+        }
+
+        .contact-status {
+          margin: 0 !important;
+          font-size: 11px !important;
+          line-height: 1.6 !important;
+        }
+
+        .contact-status.success {
+          color: #8dffbf !important;
+        }
+
+        .contact-status.error {
+          color: #ff9c9c !important;
+        }
+
         .social-links {
           display: flex;
 
@@ -2951,6 +3181,18 @@ export default function Home() {
             grid-template-columns: 1fr;
           }
 
+          .contact-form {
+            margin-top: 38px;
+          }
+
+          .contact-form-row {
+            grid-template-columns: 1fr;
+          }
+
+          .contact-submit {
+            width: 100%;
+          }
+
           .footer {
             grid-template-columns: 1fr;
 
@@ -3110,7 +3352,6 @@ function WorkCard({
   title,
   description,
   tags,
-  projectKey,
   onOpen,
 }: {
   number: string;
@@ -3118,7 +3359,6 @@ function WorkCard({
   title: string;
   description: string;
   tags: string[];
-  projectKey: string;
   onOpen: () => void;
 }) {
   return (
