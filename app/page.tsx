@@ -864,7 +864,7 @@ export default function Home() {
         </div>
 
         <div className="footer-right">
-          © {new Date().getFullYear()} Ganesh Handge
+          © 2026 Ganesh Handge
         </div>
       </footer>
 
@@ -3359,6 +3359,7 @@ function WorkCard({
   title: string;
   description: string;
   tags: string[];
+  projectKey: string;
   onOpen: () => void;
 }) {
   return (
