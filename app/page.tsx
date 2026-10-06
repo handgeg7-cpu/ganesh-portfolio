@@ -113,9 +113,10 @@ export default function Home() {
           </div>
 
           <div className="hero-eyebrow">
-            DEVOPS <span>·</span> CLOUD <span>·</span> PLATFORM ENGINEERING{" "}
-            <span>·</span> AI
-          </div>
+            Senior DevOps Engineer <span>·</span> Multi-Cloud <span>·</span>{" "}
+            AI/AIOps <span>·</span> Platform Engineering <span>·</span>{" "}
+            3x Certified <span>·</span> DBA
+            </div>
 
           <div className="hero-main">
             {/* LEFT */}
